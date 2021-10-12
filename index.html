@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <style>
+    body {
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .dragEl {
+      width: 100px;
+      height: 100px;
+      background-color: red;
+      position: relative;
+    }
+    .dragEl::before {
+      content: "Drag";
+      position: absolute;
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+    }
+  </style>
+  <body>
+    <div id="app"></div>
+    <script type="text/babel">
+      const DragEl = () => {
+        const dragElDownEventRef = React.useRef();
+        const [dragEl, setDragEl] = React.useState(null);
+        const [clientXY, setClientXY] = React.useState({});
+
+        React.useEffect(() => {
+          document.onmousemove = (e) => {
+            if (dragEl) {
+              const { clientX, clientY } = e;
+              setClientXY({
+                x: clientX,
+                y: clientY,
+              });
+            }
+          };
+          document.onmouseup = () => {
+            if (dragEl) {
+              setDragEl(null);
+              setClientXY({});
+            }
+          };
+        }, [dragEl]);
+        const mouseDownHanlder = (e, el) => {
+          const { clientX, clientY } = e;
+          dragElDownEventRef.current = e;
+          setDragEl(true);
+        };
+
+        return (
+          <div
+            className="dragEl"
+            style={
+              dragEl
+                ? {
+                    transform: `translate(${
+                      clientXY.x - dragElDownEventRef.current.clientX
+                    }px, ${clientXY.y - dragElDownEventRef.current.clientY}px)`,
+                    backgroundColor: "blue",
+                  }
+                : {}
+            }
+            onMouseDown={(e) => {
+              e.preventDefault();
+              mouseDownHanlder(e);
+            }}
+            draggable={false}
+          >
+          </div>
+        );
+      };
+
+      ReactDOM.render(<DragEl />, document.getElementById("app"));
+    </script>
+  </body>
+</html>
