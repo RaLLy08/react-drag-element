@@ -49,9 +49,10 @@
               });
             }
           };
-          document.ontouchmove = (e) => {
+          window.ontouchmove = (e) => {
             if (dragEl) {
-              const { clientX, clientY } = e;
+
+              const { clientX, clientY } = e.changedTouches[e.changedTouches.length - 1];
               setClientXY({
                 x: clientX,
                 y: clientY,
@@ -64,7 +65,7 @@
               setClientXY({});
             }
           };
-          document.ontouchcancel = (e) => {
+          document.ontouchend = (e) => {
             if (dragEl) {
               setDragEl(null);
               setClientXY({});
@@ -72,10 +73,15 @@
           }
         }, [dragEl]);
         const mouseDownHanlder = (e, el) => {
-          const { clientX, clientY } = e;
           dragElDownEventRef.current = e;
           setDragEl(true);
         };
+
+        const mouseTouchStartHandler = (e, el) => {
+          dragElDownEventRef.current = e.changedTouches[e.changedTouches.length - 1];
+          setDragEl(true);
+        };
+        console.log(clientXY);
 
         return (
           <div
@@ -96,8 +102,7 @@
               mouseDownHanlder(e);
             }}
             onTouchStart={(e) => {
-              e.preventDefault();
-              mouseDownHanlder(e);
+              mouseTouchStartHandler(e);
             }}
             draggable={false}
           >
