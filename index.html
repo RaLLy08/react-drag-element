@@ -34,9 +34,8 @@
     <div id="app"></div>
     <script type="text/babel">
       const Draggable = ({children, container=document}) => {
-        const [active, setActive] = React.useState(null);
-        const [translate, setTranslate] = React.useState({});
-
+        const [active, setActive] = React.useState(false);
+        const [translate, setTranslate] = React.useState({x: null, y: null});
         const positionsRef = React.useRef({
           initialX: null,
           initialY: null,
@@ -47,15 +46,11 @@
         })
 
         function dragStart(e) {
-          if (e.type === "touchstart") {
-            positionsRef.current.initialX = e.touches[0].clientX - positionsRef.current.xOffset;
-            positionsRef.current.initialY = e.touches[0].clientY - positionsRef.current.yOffset;
-          } else {
-            positionsRef.current.initialX = e.clientX - positionsRef.current.xOffset;
-            positionsRef.current.initialY = e.clientY - positionsRef.current.yOffset;
-          }
+          positionsRef.current.initialX = e.clientX - positionsRef.current.xOffset;
+          positionsRef.current.initialY = e.clientY - positionsRef.current.yOffset;
+
           setActive(true);
-        }
+        } 
 
         function dragEnd() {
           positionsRef.current.initialX = positionsRef.current.currentX;
@@ -101,7 +96,7 @@
               dragStart(e);
             }}
             onTouchStart={(e) => {
-              dragStart(e);
+              dragStart(e.touches[0]);
             }}
             draggable={false}
           >
