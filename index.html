@@ -34,85 +34,84 @@
   <body>
     <div id="app"></div>
     <script type="text/babel">
-      const DragEl = () => {
-        const dragElDownEventRef = React.useRef();
-        const [dragEl, setDragEl] = React.useState(null);
-        const [clientXY, setClientXY] = React.useState({});
+      const Draggable = ({children, container=document}) => {
+        const [active, setActive] = React.useState(null);
+        const [translate, setTranslate] = React.useState({});
 
+        const positionsRef = React.useRef({
+          initialX: null,
+          initialY: null,
+          currentX: null,
+          currentY: null,
+          xOffset: 0,
+          yOffset: 0,
+        })
+
+        function dragStart(e) {
+          if (e.type === "touchstart") {
+            positionsRef.current.initialX = e.touches[0].clientX - positionsRef.current.xOffset;
+            positionsRef.current.initialY = e.touches[0].clientY - positionsRef.current.yOffset;
+          } else {
+            positionsRef.current.initialX = e.clientX - positionsRef.current.xOffset;
+            positionsRef.current.initialY = e.clientY - positionsRef.current.yOffset;
+          }
+          setActive(true);
+        }
+
+        function dragEnd() {
+          positionsRef.current.initialX = positionsRef.current.currentX;
+          positionsRef.current.initialY = positionsRef.current.currentY;
+
+          setActive(false);
+        }
+
+        function drag(e) {
+          if (active) {
+            positionsRef.current.currentX = e.clientX - positionsRef.current.initialX;
+            positionsRef.current.currentY = e.clientY - positionsRef.current.initialY;
+
+            positionsRef.current.xOffset = positionsRef.current.currentX;
+            positionsRef.current.yOffset = positionsRef.current.currentY;
+
+            setTranslate({
+              x: positionsRef.current.currentX,
+              y: positionsRef.current.currentY
+            });
+          }
+        }
+        
         React.useEffect(() => {
-          document.onmousemove = (e) => {
-            if (dragEl) {
-              const { clientX, clientY } = e;
-              setClientXY({
-                x: clientX,
-                y: clientY,
-              });
-            }
-          };
-          window.ontouchmove = (e) => {
-            if (dragEl) {
-
-              const { clientX, clientY } = e.changedTouches[e.changedTouches.length - 1];
-              setClientXY({
-                x: clientX,
-                y: clientY,
-              });
-            }
-          }
-          document.onmouseup = () => {
-            if (dragEl) {
-              setDragEl(null);
-              setClientXY({});
-            }
-          };
-          document.ontouchend = (e) => {
-            if (dragEl) {
-              setDragEl(null);
-              setClientXY({});
-            }
-          }
-        }, [dragEl]);
-        const mouseDownHanlder = (e, el) => {
-          dragElDownEventRef.current = e;
-          setDragEl(true);
-        };
-
-        const mouseTouchStartHandler = (e, el) => {
-          dragElDownEventRef.current = e.changedTouches[e.changedTouches.length - 1];
-          setDragEl(true);
-        };
-        console.log(clientXY);
+          container.onmousemove = drag;
+          container.onmouseup = dragEnd;
+          container.ontouchmove = (e) => drag(e.touches[0]);
+          container.ontouchend = dragEnd;
+        }, [active, container]);
 
         return (
           <div
-            className="dragEl"
             style={
-              dragEl
-                ? {
-                    transform: `translate(${
-                      clientXY.x - dragElDownEventRef.current.clientX
-                    }px, ${clientXY.y - dragElDownEventRef.current.clientY}px)`,
-                    backgroundColor: "blue",
-                    cursor: 'grabbing'
-                  }
-                : {}
+              {
+                transform: `translate(${
+                  translate.x
+                }px, ${translate.y}px)`,
+                cursor: 'grabbing'
+              }
             }
             onMouseDown={(e) => {
               e.preventDefault();
-              mouseDownHanlder(e);
+              dragStart(e);
             }}
             onTouchStart={(e) => {
-              mouseTouchStartHandler(e);
+              dragStart(e);
             }}
             draggable={false}
           >
-            X:{clientXY.x}
-            Y:{clientXY.y}
+            {children}
           </div>
         );
       };
 
-      ReactDOM.render(<DragEl />, document.getElementById("app"));
+      ReactDOM.render(<Draggable> <div className="dragEl"> </div> </Draggable>, document.getElementById("app"));
     </script>
   </body>
 </html>
