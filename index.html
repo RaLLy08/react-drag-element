@@ -21,7 +21,6 @@
       height: 100px;
       background-color: red;
       position: relative;
-      cursor: grab;
     }
     .dragEl::before {
       content: "Drag me";
@@ -79,7 +78,7 @@
             });
           }
         }
-        
+
         React.useEffect(() => {
           container.onmousemove = drag;
           container.onmouseup = dragEnd;
@@ -94,7 +93,7 @@
                 transform: `translate(${
                   translate.x
                 }px, ${translate.y}px)`,
-                cursor: 'grabbing'
+                cursor: active ? "grabbing" : "grab"
               }
             }
             onMouseDown={(e) => {
